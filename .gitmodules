@@ -1,0 +1,12 @@
+[submodule "AutoHideCMD/deps/AllegroCPP"]
+	path = AutoHideCMD/deps/AllegroCPP
+	url = https://www.github.com/Lohkdesgds/AllegroCPP
+[submodule "AutoHideCMD/deps/Process"]
+	path = AutoHideCMD/deps/Process
+	url = https://www.github.com/LunarisLib/Lunaris-Process
+[submodule "AutoHideCMD/deps/Socket"]
+	path = AutoHideCMD/deps/Socket
+	url = https://www.github.com/LunarisLib/Lunaris-Socket
+[submodule "AutoHideCMD/deps/HTTPLIB"]
+	path = AutoHideCMD/deps/HTTPLIB
+	url = https://github.com/yhirose/cpp-httplib
