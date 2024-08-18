@@ -1,0 +1,3 @@
+- Improved logging page mechanism
+- Made code more readable
+- Added Github Actions to build for major platforms
