@@ -12,4 +12,4 @@ endif()
 project ("BaseProject")
 
 # Include sub-projects.
-add_subdirectory ("AutoHideCMD")
+add_subdirectory ("WebCMD")

@@ -1,12 +1,12 @@
-[submodule "AutoHideCMD/deps/AllegroCPP"]
-	path = AutoHideCMD/deps/AllegroCPP
+[submodule "WebCMD/deps/AllegroCPP"]
+	path = WebCMD/deps/AllegroCPP
 	url = https://www.github.com/Lohkdesgds/AllegroCPP
-[submodule "AutoHideCMD/deps/Process"]
-	path = AutoHideCMD/deps/Process
+[submodule "WebCMD/deps/Process"]
+	path = WebCMD/deps/Process
 	url = https://www.github.com/LunarisLib/Lunaris-Process
-[submodule "AutoHideCMD/deps/Socket"]
-	path = AutoHideCMD/deps/Socket
+[submodule "WebCMD/deps/Socket"]
+	path = WebCMD/deps/Socket
 	url = https://www.github.com/LunarisLib/Lunaris-Socket
-[submodule "AutoHideCMD/deps/HTTPLIB"]
-	path = AutoHideCMD/deps/HTTPLIB
+[submodule "WebCMD/deps/HTTPLIB"]
+	path = WebCMD/deps/HTTPLIB
 	url = https://github.com/yhirose/cpp-httplib
