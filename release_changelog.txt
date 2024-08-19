@@ -1,3 +1,5 @@
 - Improved logging page mechanism
 - Made code more readable
+- Changed to CMake project, so multiplatform!
 - Added Github Actions to build for major platforms
+- Enhanced code for windows startup

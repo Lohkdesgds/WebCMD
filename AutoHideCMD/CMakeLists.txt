@@ -6,7 +6,12 @@
 project(AutoHideCMD VERSION 1.0 DESCRIPTION "Run processes and keep track of them in a local page in localhost.")
 
 file(GLOB_RECURSE source_list "src/*.cpp")
-add_executable(${PROJECT_NAME} ${source_list})
+
+if (WIN32) 
+    add_executable(${PROJECT_NAME} WIN32 ${source_list})
+else()
+    add_executable(${PROJECT_NAME} ${source_list})
+endif()
 
 # Release?
 # set(CMAKE_BUILD_TYPE Release)

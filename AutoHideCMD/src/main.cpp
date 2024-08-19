@@ -18,6 +18,9 @@ int main(int argc, char* argv[])
 	svr.Get("/", [&](const httplib::Request& req, httplib::Response& res) {
 		res.set_content(_page_header, _page_header_len, "text/html");
 	});
+	svr.Get("/favicon", [&](const httplib::Request& req, httplib::Response& res) {
+		res.set_content((const char*)_page_favicon, _page_favicon_len, "image/png");
+	});
 	svr.Get("/stop", [&](const httplib::Request& req, httplib::Response& res) {
 		res.status = httplib::StatusCode::Accepted_202;
 		svr.stop();
@@ -52,7 +55,11 @@ int main(int argc, char* argv[])
 		}));
 	}
 
+#ifdef _DEBUG
+	svr.listen("0.0.0.0", 963);
+#else
 	svr.listen("0.0.0.0", 80);
+#endif
 
 	return 0;
 }
