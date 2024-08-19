@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!--meta http-equiv="refresh" content="5"-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <html lang="en">
+    <link rel="icon" type="image/png" href="/favicon">
+
+
+    <title>Virtual Console</title>
+    <style>
+        html {
+            box-sizing: border-box;
+            min-width: 100%;
+            max-width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background-color: hsl(0, 0%, 95%);
+        }
+
+        .controller button {
+            color: white;
+            padding: 6px 20px;
+            text-align: center;
+            border-radius: 10px;
+            margin: 0;
+        }
+
+        .logging {
+            width: 100%;
+            margin: 6px 0;
+        }
+
+            .logging .header {
+                background-color: black;
+                color: white;
+            }
+
+            .logging .line {
+                background-color: #eee;
+                color: black;
+            }
+
+        [color=green] {
+            background-color: green;
+        }
+
+        [color=red] {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <section class="controller">
+        <button id="ctl_refresh" state="ON" color="green">Auto refresh ON</button>
+        <button id="ctl_stop" href="/stop" color="red">Stop</button>
+    </section>
+
+    <table class="logging" id="log_base">
+        <tr class="header">
+            <th style="width: 140px">Time</th>
+            <th style="width: 30px">ID</th>
+            <th style="width: auto">Content</th>
+        </tr>
+    </table>
+</body>
+</html>
+<script>
+    function make_request(method, url) {
+        return new Promise(function (resolve, reject) {
+            let xhr = new XMLHttpRequest();
+            xhr.open(method, url);
+            xhr.onload = function () {
+                if (this.status >= 200 && this.status < 300) {
+                    resolve(xhr.response);
+                } else {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText
+                    });
+                }
+            };
+            xhr.onerror = function () {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            };
+            xhr.send();
+        });
+    }
+    function _fn(num, zeros) {
+        const r = "000000000" + num;
+        return r.substring(r.length - zeros);
+    }
+
+    const list_max_elements = 100;
+    let last_element_received = 0;
+    let timeout_fetch = null;
+    let scheduled_stop = false;
+
+    document.getElementById("ctl_refresh").addEventListener("click", function () {
+        scheduled_stop = !(this.getAttribute("state") === "ON");
+
+        this.setAttribute("state", scheduled_stop ? "ON" : "OFF");
+        this.innerText = scheduled_stop ? "Auto refresh OFF" : "Auto refresh ON";
+    });
+    document.getElementById("ctl_stop").addEventListener("click", async function () {
+        const res = await make_request("GET", "/stop");
+
+        scheduled_stop = true;
+        const day = new Date();
+        
+        post_element(last_element_received++, `${_fn(day.getFullYear(), 4)}-${_fn(day.getMonth(), 2)}-${_fn(day.getDate(), 2)} ${_fn(day.getHours(), 2)}:${_fn(day.getMinutes(), 2)}:${_fn(day.getSeconds(), 2)}`, -1, "APP IS NOW DEAD (if everything worked as expected)");
+        post_element(last_element_received++, `${_fn(day.getFullYear(), 4)}-${_fn(day.getMonth(), 2)}-${_fn(day.getDate(), 2)} ${_fn(day.getHours(), 2)}:${_fn(day.getMinutes(), 2)}:${_fn(day.getSeconds(), 2)}`, -1, "Auto refresh was disabled because of that.");
+        document.getElementById("ctl_refresh").innerText = scheduled_stop ? "Auto refresh OFF" : "Auto refresh ON";
+    });
+
+    function post_element(index, date, threadid, text) {
+        const base = document.getElementById("log_base").children[0]; /* tbody */
+        if (!base) return;
+
+        let el = document.getElementById(`log_${index}`);
+
+        if (el != null) {
+            el.children[0].innerHTML = date;
+            el.children[1].innerHTML = threadid;
+            el.children[2].innerHTML = text;
+            return;
+        }
+
+        el = document.createElement("tr");
+        for (let i = 0; i < 3; ++i)
+            el.appendChild(document.createElement("td"));
+
+        el.children[0].innerHTML = date;
+        el.children[1].innerHTML = threadid;
+        el.children[2].innerHTML = text;
+
+        el.setAttribute("id", `log_${index}`);
+
+        if (base.children.length >= 2) base.insertBefore(el, base.children[1]);
+        else base.appendChild(el);
+
+        if (base.children.length > list_max_elements + 1) {
+            base.removeChild(base.children[base.children.length - 1]);
+        }
+    }
+
+    function make_scheduler_in_time(delta_ms) {
+        if (timeout_fetch) clearTimeout(timeout_fetch);
+        if (typeof delta_ms == 'number' && delta_ms > 0) timeout_fetch = setTimeout(fetch_updates, delta_ms);
+        else timeout_fetch = null;
+    }
+    function is_scheduled_task_still_running() {
+        return timeout_fetch !== null;
+    }
+
+
+    async function fetch_updates() {
+        if (scheduled_stop || is_scheduled_task_still_running()) {
+            make_scheduler_in_time(1000);
+            timeout_fetch = null;
+            //console.log(`Fetch updates: Scheduled task recall was too early. Waiting main task to clean up.`);
+            return;
+        }
+        make_scheduler_in_time(500);
+
+        let rj;
+
+        try {
+            rj = await make_request("GET", `/read?index=${last_element_received}`);
+        }
+        catch (err) {
+            console.log(`Fetch updates: Exception: ${err}. Scheduling 5 seconds later.`);
+            make_scheduler_in_time(5000);
+            timeout_fetch = null;
+            return;
+        }
+
+        if (!rj) {
+            console.log(`Fetch updates: No updates or offline. Tried ${last_element_received} element.`);
+            timeout_fetch = null;
+            return;
+        }
+        const j = JSON.parse(rj);
+
+        const real_idx = j["real_idx"];
+
+        const dt = j["date"];
+        const ix = j["thread"];
+        const tx = j["text"];
+
+        if (dt == null || ix == null || tx == null || real_idx == null) {
+            //console.log(`Fetch updates: Update got invalid data. [${dt};${ix};${tx}]`);
+            make_scheduler_in_time(1000);
+            timeout_fetch = null;
+            return;
+        }
+
+        last_element_received = Number(j["real_idx"]);
+
+        post_element(last_element_received, dt, ix, tx);
+        ++last_element_received;
+
+        make_scheduler_in_time(50);
+        timeout_fetch = null;
+    }
+
+
+    setTimeout(fetch_updates, 20);
+</script>
+
+
+<!--
+
+    // TESTING:
+
+
+    function _test_inf_post(limit, interval) {
+        const o = {
+            i: 0,
+            l: limit || 10,
+            t: interval || 500,
+            f: function () {
+                const day = new Date();
+                post_element(o.i++, `${_fn(day.getFullYear(), 4)}-${_fn(day.getMonth(), 2)}-${_fn(day.getDate(), 2)} ${_fn(day.getHours(), 2)}:${_fn(day.getMinutes(), 2)}:${_fn(day.getSeconds(), 2)}`, Math.floor(Math.random() * 10), "Just some text");
+                if (o.i < o.l) setTimeout(o.f, o.t);
+            }
+        };
+
+        setTimeout(o.f, o.t);
+    }
+
+
+-->
