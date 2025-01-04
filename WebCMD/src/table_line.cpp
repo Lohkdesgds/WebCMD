@@ -4,7 +4,8 @@
 #include <iomanip>
 #include <sstream>
 
-std::atomic_uint64_t TableLine::m_counter_ref;
+std::uint64_t TableLine::m_counter_ref;
+std::mutex TableLine::m_counter_mtx;
 
 static std::string _make_time_string()
 {
@@ -30,8 +31,10 @@ TableLine::TableLine(TableLine&& o) noexcept
 }
 
 TableLine::TableLine(const uint64_t id, const std::string& text)
-	: m_creation_time(_make_time_string()), m_log_text(text), m_source_id(id), m_counter(m_counter_ref++)
+	: m_creation_time(_make_time_string()), m_log_text(text), m_source_id(id)//, m_counter(m_counter_ref++)
 {
+	std::lock_guard<std::mutex> l(m_counter_mtx);
+	m_counter = m_counter_ref++;
 }
 
 uint64_t TableLine::get_index() const
