@@ -4,4 +4,5 @@
 
 .vs/
 _old/
-out/build/
+out/
+build/

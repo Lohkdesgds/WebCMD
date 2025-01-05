@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/WebCMD.dir/src/history.cpp.o CMakeFiles/WebCMD.dir/src/main.cpp.o CMakeFiles/WebCMD.dir/src/main_win32_wrapper.cpp.o CMakeFiles/WebCMD.dir/src/quick_tools.cpp.o CMakeFiles/WebCMD.dir/src/table_line.cpp.o -o WebCMD
