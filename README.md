@@ -5,10 +5,10 @@
 
 ### How to use it:
 
-*Make a bat file following the format:*
+*Make a bat file following the format: (--port is optional)*
 
 ```bat
-start "" AutoHideCMD.exe "first_app.exe" "second_app.exe" "cmd /c echo This should work and run as third"
+start "" <app> --port 8080 $ first_app.exe $ second_app.exe $ cmd /c "echo This should work and run as third"
 exit
 ```
 
