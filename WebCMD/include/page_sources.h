@@ -9,6 +9,7 @@ const char _page_header[] = R"===(<!DOCTYPE html>
     <html lang="en">
     <link rel="icon" type="image/png" href="/favicon">
 
+
     <title>Virtual Console</title>
     <style>
         html {
@@ -58,11 +59,12 @@ const char _page_header[] = R"===(<!DOCTYPE html>
     <section class="controller">
         <button id="ctl_refresh" state="ON" color="green">Auto refresh ON</button>
         <button id="ctl_stop" href="/stop" color="red">Stop</button>
+        <button id="ctl_restart" href="/restart" color="red">Restart (do not stop first)</button>
     </section>
 
     <table class="logging" id="log_base">
         <tr class="header">
-            <th style="width: 140px">Time</th>
+            <th style="width: 160px">Time</th>
             <th style="width: 30px">ID</th>
             <th style="width: auto">Content</th>
         </tr>
@@ -109,6 +111,10 @@ const char _page_header[] = R"===(<!DOCTYPE html>
         this.setAttribute("state", scheduled_stop ? "ON" : "OFF");
         this.innerText = scheduled_stop ? "Auto refresh OFF" : "Auto refresh ON";
     });
+    document.getElementById("ctl_restart").addEventListener("click", async function () {
+        const res = await make_request("GET", "/restart");
+        archive_current_and_reset_for_restart();
+    });
     document.getElementById("ctl_stop").addEventListener("click", async function () {
         const res = await make_request("GET", "/stop");
 
@@ -149,6 +155,19 @@ const char _page_header[] = R"===(<!DOCTYPE html>
         if (base.children.length > list_max_elements + 1) {
             base.removeChild(base.children[base.children.length - 1]);
         }
+    }
+
+    function archive_current_and_reset_for_restart() {
+        const day = new Date();
+        post_element(last_element_received, `${_fn(day.getFullYear(), 4)}-${_fn(day.getMonth(), 2)}-${_fn(day.getDate(), 2)} ${_fn(day.getHours(), 2)}:${_fn(day.getMinutes(), 2)}:${_fn(day.getSeconds(), 2)}`, -1, "Restarting logs...");
+        
+        for(let idx = last_element_received; idx >= 0; idx--) {
+            let el = document.getElementById(`log_${idx}`);
+            if (el) el.setAttribute("id", `log_old_${idx}`);
+        }
+
+        make_scheduler_in_time(5000);
+        last_element_received = 0;
     }
 
     function make_scheduler_in_time(delta_ms) {
@@ -207,13 +226,37 @@ const char _page_header[] = R"===(<!DOCTYPE html>
         post_element(last_element_received, dt, ix, tx);
         ++last_element_received;
 
-        make_scheduler_in_time(50);
+        make_scheduler_in_time(20);
         timeout_fetch = null;
     }
 
-
     setTimeout(fetch_updates, 20);
-</script>)===";
+</script>
+
+
+<!--
+
+    // TESTING:
+
+
+    function _test_inf_post(limit, interval) {
+        const o = {
+            i: 0,
+            l: limit || 10,
+            t: interval || 500,
+            f: function () {
+                const day = new Date();
+                post_element(o.i++, `${_fn(day.getFullYear(), 4)}-${_fn(day.getMonth(), 2)}-${_fn(day.getDate(), 2)} ${_fn(day.getHours(), 2)}:${_fn(day.getMinutes(), 2)}:${_fn(day.getSeconds(), 2)}`, Math.floor(Math.random() * 10), "Just some text");
+                if (o.i < o.l) setTimeout(o.f, o.t);
+            }
+        };
+
+        setTimeout(o.f, o.t);
+    }
+
+
+-->
+)===";
 
 constexpr size_t _page_header_len = sizeof(_page_header) - 1;
 

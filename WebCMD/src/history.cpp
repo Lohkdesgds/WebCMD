@@ -23,3 +23,11 @@ std::string History::get_index_autofix(uint64_t i) const
 
 	return m_history[i - lowest].to_JSON();
 }
+
+void History::clear()
+{
+	std::lock_guard<std::mutex> l(m_mtx);
+	m_history.clear();
+	TableLine::reset_counter();
+	m_lowest_val = 0;
+}

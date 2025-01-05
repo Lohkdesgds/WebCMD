@@ -1,0 +1,5 @@
+/media/lohk/LOHK4TB/Github/Lohkdesgds/WebCMD/build/CMakeFiles/edit_cache.dir
+/media/lohk/LOHK4TB/Github/Lohkdesgds/WebCMD/build/CMakeFiles/rebuild_cache.dir
+/media/lohk/LOHK4TB/Github/Lohkdesgds/WebCMD/build/WebCMD/CMakeFiles/WebCMD.dir
+/media/lohk/LOHK4TB/Github/Lohkdesgds/WebCMD/build/WebCMD/CMakeFiles/edit_cache.dir
+/media/lohk/LOHK4TB/Github/Lohkdesgds/WebCMD/build/WebCMD/CMakeFiles/rebuild_cache.dir

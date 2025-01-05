@@ -17,4 +17,6 @@ public:
 	uint64_t get_lowest_value() const;
 
 	std::string get_index_autofix(uint64_t) const;
+
+	void clear();
 };

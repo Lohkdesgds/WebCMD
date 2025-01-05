@@ -46,3 +46,9 @@ std::string TableLine::to_JSON() const
 {
 	return "{\"date\":\"" + m_creation_time + "\",\"thread\":" + std::to_string(m_source_id) + ",\"text\":\"" + m_log_text + "\",\"real_idx\":" + std::to_string(m_counter) + "}";
 }
+
+void TableLine::reset_counter()
+{
+	std::lock_guard<std::mutex> l(m_counter_mtx);
+	m_counter_ref = 0;
+}

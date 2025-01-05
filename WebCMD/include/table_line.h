@@ -17,4 +17,6 @@ public:
 
 	uint64_t get_index() const;
 	std::string to_JSON() const;
+
+	static void reset_counter();
 };
