@@ -58,11 +58,12 @@
         <button id="ctl_refresh" state="ON" color="green">Auto refresh ON</button>
         <button id="ctl_stop" href="/stop" color="red">Stop</button>
         <button id="ctl_restart" href="/restart" color="red">Restart (do not stop first)</button>
+        <input placeholder="Filter for ID column..." id="ctl_filter" />
     </section>
 
     <table class="logging" id="log_base">
         <tr class="header">
-            <th style="width: 160px">Time</th>
+            <th style="width: 200px">Time</th>
             <th style="width: 30px">ID</th>
             <th style="width: auto">Content</th>
         </tr>
@@ -102,6 +103,26 @@
     let last_element_received = 0;
     let timeout_fetch = null;
     let scheduled_stop = false;
+
+    document.getElementById("ctl_filter").addEventListener("keyup", function(ev) {
+        const filtering = ev.target.value;
+        const everyone = document.querySelectorAll("td");
+
+        if (filtering.length == 0) {
+            for(let i = 0; i < everyone.length; ++i) {
+                everyone[i].parentElement.style.display = "";
+            }
+            return;
+        }
+
+        const arr_filter = Array.prototype.filter.call(everyone, function(el){return el.textContent != filtering; });
+        const arr_show = Array.prototype.filter.call(everyone, function(el){return el.textContent == filtering; });
+
+        for(let i = 0; i < arr_filter.length; ++i)
+            arr_filter[i].parentElement.style.display = "none";
+        for(let i = 0; i < arr_show.length; ++i)
+            arr_show[i].parentElement.style.display = "";
+    });
 
     document.getElementById("ctl_refresh").addEventListener("click", function () {
         scheduled_stop = !(this.getAttribute("state") === "ON");
@@ -224,7 +245,7 @@
         post_element(last_element_received, dt, ix, tx);
         ++last_element_received;
 
-        make_scheduler_in_time(20);
+        make_scheduler_in_time(2);
         timeout_fetch = null;
     }
 
